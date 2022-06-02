@@ -33,16 +33,17 @@ class MyStatefulWidget extends StatefulWidget {
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   final TextEditingController _task =
       TextEditingController(); //controller for getting name
-  final TextEditingController _details =
-      TextEditingController(); //controller for getting details
+  final TextEditingController _edit =
+      TextEditingController(); //controller for getting edit
   final _formKey = GlobalKey<FormState>();
-
-  //create a DBHelper object to access database functions
-  // DBHelper db = DBHelper();
-  NetworkHelper db = NetworkHelper();
-
   //create a counter variable for Task id
   int counter = 200;
+  String newEditValue = "";
+  String editTextFieldValue = "";
+  bool _checked = false;
+
+  //create a helper object to access network functions
+  NetworkHelper db = NetworkHelper();
 
   // create a future list of task that will store all the task data from database
   late Future<List<Task>> myTask;
@@ -133,15 +134,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             minimumSize: const Size(88, 36),
             padding: const EdgeInsets.symmetric(horizontal: 16)),
         child: const Text(
-          'SAVE',
+          'ADD TASK',
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            //instantiate a task object
-            // Task task1 = Task(
-            //     userId: 1, id: counter++, title: _task.text, completed: false);
-            //insert task object to database
             final List tasksList = await myTask;
             db.insertTask(1, counter++, _task.text, false);
             setState(() {
@@ -159,7 +156,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             );
             //clear text on controllers after successful insert of data to database
             _task.clear();
-            _details.clear();
 
             FocusScope.of(context).unfocus(); // unfocus input fields
           }
@@ -185,12 +181,63 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
   }
 
+  Future<void> editModal(BuildContext context, int taskIdx) async {
+    final List tasksList = await myTask;
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Edit Task'),
+            content: TextField(
+              onChanged: (value) {
+                setState(() {
+                  editTextFieldValue = value;
+                });
+              },
+              controller: _edit..text = tasksList[taskIdx].title,
+              decoration: const InputDecoration(hintText: "Edit Task"),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.red,
+                textColor: Colors.white,
+                child: const Text('CANCEL'),
+                onPressed: () {
+                  setState(() {
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+              FlatButton(
+                color: Colors.green,
+                textColor: Colors.white,
+                child: Text('OK'),
+                onPressed: () {
+                  newEditValue = editTextFieldValue;
+                  db.updateTask(1, tasksList[taskIdx].id, newEditValue,
+                      tasksList[taskIdx].completed);
+                  setState(() {
+                    tasksList[taskIdx] = Task(
+                        userId: 1,
+                        id: taskIdx,
+                        title: newEditValue,
+                        completed: tasksList[taskIdx].completed);
+                    Navigator.pop(context);
+                  });
+                },
+              ),
+            ],
+          );
+        });
+  }
+
   // widget that returns listview of myTask data
   Widget buildText(List<Task> myTask) {
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
       itemCount: myTask.length,
       itemBuilder: (context, int index) {
+        _checked = myTask[index].completed;
         return Center(
           child: Card(
             // wrap in card for styling
@@ -200,7 +247,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             ),
             color: const Color.fromARGB(0, 0, 0, 0),
             child: CheckboxListTile(
-              // put task's name/title and details in the ListTile widget
+              selected: _checked,
+              value: _checked,
               contentPadding: const EdgeInsets.only(left: 10),
               title: Text(myTask[index].title,
                   style: const TextStyle(
@@ -213,7 +261,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     icon: const Icon(Icons.edit,
                         color: Color.fromARGB(255, 92, 57, 248)),
                     onPressed: () {
-                      // await db.deleteTask(myTask[index].id); // delete task
+                      editModal(context, index);
                     },
                   ),
                   IconButton(
@@ -234,10 +282,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 ],
               ),
               controlAffinity: ListTileControlAffinity.leading,
-              onChanged: (bool? value) {
-                setState(() {});
+              onChanged: (bool? value) async {
+                final List tasksList = await myTask;
+                setState(() {
+                  tasksList[index] = Task(
+                      userId: 1,
+                      id: tasksList[index].id,
+                      title: tasksList[index].title,
+                      completed: value!);
+                });
               },
-              value: myTask[index].completed,
             ),
           ),
         );
