@@ -220,7 +220,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     icon: const Icon(Icons.delete,
                         color: Color.fromARGB(255, 219, 15, 0)),
                     onPressed: () {
-                      // db.deleteTask(myTask[index].id.toString()); // delete task
+                      db.deleteTask(myTask[index].id.toString()); // delete task
                       setState(() {
                         myTask.removeAt(
                             index); // remove task in the UI without reloading
