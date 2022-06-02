@@ -19,7 +19,7 @@ surnameinitials_exer3_section e.g. (arriolajmt_exer3_wx1l).
 # Documentation
 
 - You must add screenshots of your work.\
-  <img src="screenshots/app1.jpg" width="280" height="590"> <img src="screenshots/app2.jpg" width="280" height="590">
+  <img src="screenshots/app1.png" width="280" height="590"> <img src="screenshots/app2.png" width="280" height="590">
 
 - What did you add to the code.
   > My exercise 3 code serves as my template for this exercise. I modified the template based on the exercise's requirements, which is also a To Do App but communicates with a network. I added the network functionalities. These are the fetching (get), adding (post), updating (put), and deleting (delete) of data from the network.
