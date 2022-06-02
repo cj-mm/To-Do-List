@@ -143,7 +143,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             //     userId: 1, id: counter++, title: _task.text, completed: false);
             //insert task object to database
             final List tasksList = await myTask;
-            // db.insertTask(1, counter++, _task.text, false);
+            db.insertTask(1, counter++, _task.text, false);
             setState(() {
               tasksList.add(Task(
                   userId: 1,
