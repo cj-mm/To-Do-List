@@ -198,15 +198,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            color: const Color.fromARGB(47, 255, 255, 255),
-            child: ListTile(
+            color: const Color.fromARGB(0, 0, 0, 0),
+            child: CheckboxListTile(
               // put task's name/title and details in the ListTile widget
               contentPadding: const EdgeInsets.only(left: 10),
               title: Text(myTask[index].title,
                   style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       color: Color.fromARGB(255, 44, 43, 43))),
-              trailing: Wrap(
+              secondary: Wrap(
                 spacing: -18, // space between two icons
                 children: <Widget>[
                   IconButton(
@@ -233,6 +233,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   ),
                 ],
               ),
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (bool? value) {
+                setState(() {});
+              },
+              value: myTask[index].completed,
             ),
           ),
         );
