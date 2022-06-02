@@ -209,21 +209,23 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 child: Text('OK'),
                 onPressed: () {
                   newEditValue = editTextFieldValue;
-                  network.updateTask(
-                      1,
-                      tasksList[taskIdx].id,
-                      newEditValue,
-                      tasksList[taskIdx]
-                          .completed); // update a task in the network (put request)
-                  setState(() {
-                    // update also the gui
-                    tasksList[taskIdx] = Task(
-                        userId: 1,
-                        id: taskIdx,
-                        title: newEditValue,
-                        completed: tasksList[taskIdx].completed);
-                    Navigator.pop(context);
-                  });
+                  if (newEditValue != "") {
+                    network.updateTask(
+                        1,
+                        tasksList[taskIdx].id,
+                        newEditValue,
+                        tasksList[taskIdx]
+                            .completed); // update a task in the network (put request)
+                    setState(() {
+                      // update also the gui
+                      tasksList[taskIdx] = Task(
+                          userId: 1,
+                          id: taskIdx,
+                          title: newEditValue,
+                          completed: tasksList[taskIdx].completed);
+                      Navigator.pop(context);
+                    });
+                  }
                 },
               ),
             ],
