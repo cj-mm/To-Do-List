@@ -3,7 +3,7 @@ import 'network_helper.dart';
 import 'task_model.dart';
 
 void main() {
-  // move here the ensureInitialized method of WidgetsFlutterBinding from the db_helper.dart
+  // move here the ensureInitialized method of WidgetsFlutterBinding
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
@@ -36,27 +36,23 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   final TextEditingController _edit =
       TextEditingController(); //controller for getting edit
   final _formKey = GlobalKey<FormState>();
-  //create a counter variable for Task id
   int counter = 200;
-  String newEditValue = "";
-  String editTextFieldValue = "";
-  bool _checked = false;
+  String newEditValue = ""; // will hold the updated task title
+  String editTextFieldValue = ""; // for handling the edit text field
+  final bool _validate = false; //used for validation of input
 
   //create a helper object to access network functions
-  NetworkHelper db = NetworkHelper();
+  NetworkHelper network = NetworkHelper();
 
-  // create a future list of task that will store all the task data from database
+  // create a future list of task that will store all the task data from the network
   late Future<List<Task>> myTask;
-  // late Future<Task> myTask;
   @override
   void initState() {
     super.initState();
 
-    // initialize myTask list by getting data from database
-    myTask = db.tasks();
+    // initialize myTask list by getting data from the network
+    myTask = network.tasks();
   }
-
-  final bool _validate = false; //used for validation of input
 
   @override
   Widget build(BuildContext context) {
@@ -77,20 +73,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               child: Form(
                 key: _formKey,
                 child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  // crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     buildTextField('Enter task title', _task),
-                    // const SizedBox(height: 10), // just add space in between
-                    // buildTextField('Enter details', _details),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 10), // just for adding a space
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         buildSaveButton(),
                       ],
                     ),
-                    myTaskList(),
+                    myTaskList(), // list of tasks
                   ],
                 ),
               ),
@@ -125,7 +117,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
   }
 
-  // function for creating save button
+  // function for creating add task button
   Widget buildSaveButton() {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -140,8 +132,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
             final List tasksList = await myTask;
-            db.insertTask(1, counter++, _task.text, false);
+            network.insertTask(1, counter++, _task.text,
+                false); // add task to the network (post request)
             setState(() {
+              // update the gui
               tasksList.add(Task(
                   userId: 1,
                   id: counter++,
@@ -156,7 +150,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             );
             //clear text on controllers after successful insert of data to database
             _task.clear();
-
             FocusScope.of(context).unfocus(); // unfocus input fields
           }
         });
@@ -182,7 +175,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   }
 
   Future<void> editModal(BuildContext context, int taskIdx) async {
-    final List tasksList = await myTask;
+    final List tasksList = await myTask; // get the list of tasks
     return showDialog(
         context: context,
         builder: (context) {
@@ -194,7 +187,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   editTextFieldValue = value;
                 });
               },
-              controller: _edit..text = tasksList[taskIdx].title,
+              controller: _edit
+                ..text = tasksList[taskIdx]
+                    .title, // the initial value is the original task title
               decoration: const InputDecoration(hintText: "Edit Task"),
             ),
             actions: <Widget>[
@@ -214,9 +209,14 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 child: Text('OK'),
                 onPressed: () {
                   newEditValue = editTextFieldValue;
-                  db.updateTask(1, tasksList[taskIdx].id, newEditValue,
-                      tasksList[taskIdx].completed);
+                  network.updateTask(
+                      1,
+                      tasksList[taskIdx].id,
+                      newEditValue,
+                      tasksList[taskIdx]
+                          .completed); // update a task in the network (put request)
                   setState(() {
+                    // update also the gui
                     tasksList[taskIdx] = Task(
                         userId: 1,
                         id: taskIdx,
@@ -237,7 +237,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       physics: const BouncingScrollPhysics(),
       itemCount: myTask.length,
       itemBuilder: (context, int index) {
-        _checked = myTask[index].completed;
+        bool _checked = myTask[index]
+            .completed; // will be used to determine if the checkbox is ticked/unticked
         return Center(
           child: Card(
             // wrap in card for styling
@@ -255,7 +256,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       fontWeight: FontWeight.w900,
                       color: Color.fromARGB(255, 44, 43, 43))),
               secondary: Wrap(
-                spacing: -18, // space between two icons
+                spacing: -18, // space between edit and delete icons
                 children: <Widget>[
                   IconButton(
                     icon: const Icon(Icons.edit,
@@ -268,8 +269,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     icon: const Icon(Icons.delete,
                         color: Color.fromARGB(255, 219, 15, 0)),
                     onPressed: () {
-                      db.deleteTask(myTask[index].id.toString()); // delete task
+                      network.deleteTask(myTask[index]
+                          .id
+                          .toString()); // delete task from the network (delete request)
                       setState(() {
+                        // delete also from the gui
                         myTask.removeAt(
                             index); // remove task in the UI without reloading
                       });
@@ -281,10 +285,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   ),
                 ],
               ),
-              controlAffinity: ListTileControlAffinity.leading,
+              controlAffinity:
+                  ListTileControlAffinity.leading, // position of the checkbox
               onChanged: (bool? value) async {
                 final List tasksList = await myTask;
                 setState(() {
+                  // for ticking/unticking of checkbox
                   tasksList[index] = Task(
                       userId: 1,
                       id: tasksList[index].id,

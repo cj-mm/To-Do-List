@@ -1,11 +1,9 @@
 import 'dart:convert';
 
-List<Task> postFromJson(String str) =>
-    List<Task>.from(json.decode(str).map((x) => Task.fromMap(x)));
-
+// Task Model
 class Task {
   final int userId;
-  final int? id;
+  final int id;
   final String title;
   final bool completed;
 
@@ -16,6 +14,7 @@ class Task {
     required this.completed,
   });
 
+  // maps the data of json
   factory Task.fromMap(Map<String, dynamic> json) {
     return Task(
       userId: json['userId'],
@@ -25,6 +24,7 @@ class Task {
     );
   }
 
+  // Deserializes the result from JSON
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
       userId: json['userId'],

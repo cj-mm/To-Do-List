@@ -21,7 +21,7 @@ class NetworkHelper {
     }
   }
 
-  // Define a function that inserts tasks into the network
+  // function that inserts a task into the network
   Future<Task> insertTask(
       int userId, int id, String title, bool completed) async {
     final response = await http.post(
@@ -40,7 +40,7 @@ class NetworkHelper {
     if (response.statusCode == 201) {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
-      print(jsonDecode(response.body));
+      print(jsonDecode(response.body)); // to check
       return Task.fromJson(jsonDecode(response.body));
     } else {
       // If the server did not return a 201 CREATED response,
@@ -49,6 +49,7 @@ class NetworkHelper {
     }
   }
 
+  // function that edits a task in the network
   Future<Task> updateTask(
       int userId, int id, String title, bool completed) async {
     String strId = id.toString();
@@ -77,6 +78,7 @@ class NetworkHelper {
     }
   }
 
+  // function that deletes a task in the network
   Future<void> deleteTask(String id) async {
     final http.Response response = await http.delete(
       Uri.parse('https://jsonplaceholder.typicode.com/todos/$id'),
@@ -88,8 +90,6 @@ class NetworkHelper {
       // If the server did return a 200 OK response,
       // then parse the JSON. After deleting,
       // we'll get an empty JSON `{}` response.
-      // Don't return `null`, otherwise `snapshot.hasData`
-      // will always return false on `FutureBuilder`.
       print(jsonDecode(response.body));
     } else {
       // If the server did not return a "200 OK response",
