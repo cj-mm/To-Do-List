@@ -262,7 +262,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 children: <Widget>[
                   IconButton(
                     icon: const Icon(Icons.edit,
-                        color: Color.fromARGB(255, 92, 57, 248)),
+                        color: Color.fromARGB(255, 25, 0, 255)),
                     onPressed: () {
                       editModal(context, index);
                     },
